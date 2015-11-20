@@ -45,7 +45,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
+        //update(dt);     // commenting out while I work on render
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -141,7 +141,7 @@ var Engine = (function(global) {
     }
 
     /* This function is called by the render function and is called on each game
-     * tick. It's purpose is to then call the render functions you have defined
+     * tick. Its purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
     function renderEntities() {
@@ -177,7 +177,7 @@ var Engine = (function(global) {
     Resources.onReady(init);
 
     /* Assign the canvas' context object to the global variable (the window
-     * object when run in a browser) so that developer's can use it more easily
+     * object when run in a browser) so that developers can use it more easily
      * from within their app.js files.
      */
     global.ctx = ctx;
