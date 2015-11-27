@@ -45,7 +45,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        //update(dt);     // commenting out while I work on render
+        update(dt);
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -160,7 +160,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        instantiateGameObjects();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -181,4 +181,5 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+    global.init = init; // is there a better way to do this? I thought Engine was accessible globally...
 })(this);

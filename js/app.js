@@ -6,15 +6,33 @@ var allEnemies, player;
 
 
 // Enemies our player must avoid
-var Enemy = function(y) {
+var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    this.x = 5; // all enemies start at the same x location - far left of game board
-    this.y = y * 75; // each instance will one of 3 possible y values
+    this.x = -101; // all enemies start at the same x location - far left of game board
+    this.y = getRandomInteger(1, 3) * 75; // each instance will one of 3 possible y values
+    this.front = Math.floor(this.x + 100);
+    this.top = Math.floor(this.y + 86);
+    this.bottom = Math.floor(this.y + 137);
+    //this.x = 0;
+    //this.y = 0;
+    this.speed = getRandomInteger(50, 200);
+};
+
+Enemy.prototype.overlapsPoint = function(coordArray) {
+    var x = coordArray[0];
+    var y = coordArray[1];
+    if (((this.front - 5 <= x) && (x <= this.front + 5)) || ((this.x - 5 <= x) && (x <= this.x + 5))) {
+        if ((this.top <= y) && (y <= this.bottom)) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 };
 
 // Update the enemy's position, required method for game
@@ -23,6 +41,33 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    if (this.x >= 505) {
+        this.x = -101;
+        this.speed = getRandomInteger(50, 200);
+    }
+    // handle collisions
+    var bottomLeft, bottomRight, upperLeft, upperRight;
+    bottomLeft = player.bottomLeft();
+    if (this.overlapsPoint(bottomLeft)) {
+        init();
+    }
+    bottomRight = player.bottomRight();
+    if (this.overlapsPoint(bottomRight)) {
+        init();
+    }
+    upperLeft = player.upperLeft();
+    if (this.overlapsPoint(upperLeft)) {
+        init();
+    }
+    upperRight = player.upperRight();
+    if (this.overlapsPoint(upperRight)) {
+        init();
+    }
+
+
+
+
+    this.x += dt * this.speed;
 };
 
 // Draw the enemy on the screen, required method for game
@@ -35,17 +80,79 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 var Player = function() {
     this.image = 'images/char-boy.png';
-    this.x = 200;
-    this.y = 425;
+    this.x = 200; //200
+    this.y = 425; // 425
+    this.minX = 0;
+    this.maxX = 400;
+    this.minY = 25; // this is the edge of the water - a Y value < 50 will reset game (== success)
+    this.maxY = 425;
 };
-Player.prototype.update = function(dt) {
-    // do something
+Player.prototype.bottomLeft = function() {
+    var bottomLeft = [];
+    var x = this.x + 25;
+    var y = this.y + 137;
+    bottomLeft.push(x);
+    bottomLeft.push(y);
+    return bottomLeft;
+};
+Player.prototype.bottomRight = function() {
+    var bottomRight = [];
+    var x = this.x + 80;
+    var y = this.y + 137;
+    bottomRight.push(x);
+    bottomRight.push(y);
+    return bottomRight;
+};
+Player.prototype.upperLeft = function() {
+    var upperLeft = [];
+    var x = this.x + 25;
+    var y = this.y + 68;
+    upperLeft.push(x);
+    upperLeft.push(y);
+    return upperLeft;
+};
+Player.prototype.upperRight = function() {
+    var upperRight = [];
+    var x = this.x + 80;
+    var y = this.y + 68;
+    upperRight.push(x);
+    upperRight.push(y);
+    return upperRight;
+};
+Player.prototype.update = function() {
+    // player movement is handled by handleinput and collisions handled by Enemy class - so what should this do?
 };
 Player.prototype.render = function(dt) {
     ctx.drawImage(Resources.get(this.image), this.x, this.y);
 };
-Player.prototype.handleInput = function() {
-    // move the player according to keystroke input
+Player.prototype.handleInput = function(input) {
+    var increment = 100;
+    //allEnemies.forEach(function(enemy) {
+     //   console.log("enemy:", enemy.x, enemy.y, "player:", player.x, player.y);
+   //});
+    if (input === 'up') {
+        if (this.y - increment >= this.minY) {
+            this.y -= increment;
+        } else {
+            // if this.y - increment < min.Y, player has reached the water and game resets
+            init();
+        }
+    }
+    if (input === 'down') {
+        if (this.y + increment <= this.maxY) {
+            this.y += increment;
+        }
+    }
+    if (input === 'left') {
+        if (this.x - increment >= this.minX) {
+            this.x -= increment;
+        }
+    }
+    if (input === 'right') {
+        if (this.x + increment <= this.maxX) {
+            this.x += increment;
+        }
+    }
 };
 
 
@@ -55,12 +162,11 @@ Player.prototype.handleInput = function() {
 function instantiateGameObjects() {
     allEnemies = [];
     player = new Player();
-    // generate a random number of enemies within a range that varies with level, but will always be at least 1:
-    var numberEnemies = getRandomInteger(1, level + 2);
+    // generate a random number of enemies within a range that varies with level, but will always be at least 2:
+    //var numberEnemies = getRandomInteger(2, level + 4);
+    var numberEnemies = 1; // for testing right now
     for (i = 0; i < numberEnemies; i++) {
-        // generate a random y coordinate for each enemy instance:
-        var yCoord = getRandomInteger(1, 3);
-        var enemy = new Enemy(yCoord);
+        var enemy = new Enemy();
         allEnemies.push(enemy);
     }
 }
