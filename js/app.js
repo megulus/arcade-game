@@ -26,7 +26,8 @@ var Enemy = function() {
 Enemy.prototype.overlapsPoint = function(coordArray) {
     var x = coordArray[0];
     var y = coordArray[1];
-    if (((this.front - 5 <= x) && (x <= this.front + 5)) || ((this.x - 5 <= x) && (x <= this.x + 5))) {
+    console.log(this.front, x);
+    if ((this.front - 10 <= x) && (x <= this.front + 10)) {
         if ((this.top <= y) && (y <= this.bottom)) {
             return true;
         }
@@ -68,6 +69,7 @@ Enemy.prototype.update = function(dt) {
 
 
     this.x += dt * this.speed;
+    this.front = this.x + 100;
 };
 
 // Draw the enemy on the screen, required method for game
@@ -89,7 +91,7 @@ var Player = function() {
 };
 Player.prototype.bottomLeft = function() {
     var bottomLeft = [];
-    var x = this.x + 25;
+    var x = this.x + 20;
     var y = this.y + 137;
     bottomLeft.push(x);
     bottomLeft.push(y);
@@ -105,7 +107,7 @@ Player.prototype.bottomRight = function() {
 };
 Player.prototype.upperLeft = function() {
     var upperLeft = [];
-    var x = this.x + 25;
+    var x = this.x + 20;
     var y = this.y + 68;
     upperLeft.push(x);
     upperLeft.push(y);
