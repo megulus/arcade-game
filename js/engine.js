@@ -161,7 +161,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        instantiateGameObjects(level, score);
+        instantiateGameObjects(level, score, lives);
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -184,4 +184,5 @@ var Engine = (function(global) {
     global.ctx = ctx;
     global.canvas = canvas;
     global.init = init; // is there a better way to do this? I thought Engine was accessible globally...
+    global.reset = reset;
 })(this);

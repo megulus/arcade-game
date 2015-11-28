@@ -2,6 +2,7 @@
 // this might get updated later in a version with additional functionality
 var level = 0;
 var score = 0;
+var lives = 3;
 var allEnemies, player;
 
 
@@ -25,8 +26,11 @@ Enemy.prototype.overlapsPoint = function(coordArray) {
     var x = coordArray[0];
     var y = coordArray[1];
     if ((this.front - 10 <= x) && (x <= this.front + 10)) {
+        //console.log(this.top, this.bottom, y);
+    //if (((this.front - 10 <= x) && (x <= this.front + 10)) || ((this.x - 10 <= x) && (x <= this.x + 10))) {
         if ((this.top <= y) && (y <= this.bottom)) {
             score -= 1;
+            lives -= 1;
             return true;
         }
         return false;
@@ -42,25 +46,30 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     if (this.x >= 505) {
         this.x = -101;
-        this.speed = getRandomInteger(50, 100) * level;
+        this.front = this.x + 100;
+        this.speed = getRandomInteger(50, 100) * (level + 1);
     }
     // handle collisions
     var bottomLeft, bottomRight, upperLeft, upperRight;
     bottomLeft = player.bottomLeft();
     if (this.overlapsPoint(bottomLeft)) {
-        init();
+        reset();
+        //init();
     }
     bottomRight = player.bottomRight();
     if (this.overlapsPoint(bottomRight)) {
-        init();
+        reset();
+        //init();
     }
     upperLeft = player.upperLeft();
     if (this.overlapsPoint(upperLeft)) {
-        init();
+        reset();
+        //init();
     }
     upperRight = player.upperRight();
     if (this.overlapsPoint(upperRight)) {
-        init();
+        reset();
+        //init();
     }
     this.x += dt * this.speed;
     this.front = this.x + 100;
@@ -77,16 +86,16 @@ Enemy.prototype.render = function() {
 var Player = function() {
     this.image = 'images/char-boy.png';
     this.x = 200; //200
-    this.y = 425; // 425
+    this.y = 415; // 425
     this.minX = 0;
     this.maxX = 400;
     this.minY = 25; // this is the edge of the water - a Y value < 50 will reset game (== success)
-    this.maxY = 425;
+    this.maxY = 415;
 };
 Player.prototype.bottomLeft = function() {
     var bottomLeft = [];
     var x = this.x + 20;
-    var y = this.y + 137;
+    var y = this.y + 135;
     bottomLeft.push(x);
     bottomLeft.push(y);
     return bottomLeft;
@@ -94,7 +103,7 @@ Player.prototype.bottomLeft = function() {
 Player.prototype.bottomRight = function() {
     var bottomRight = [];
     var x = this.x + 80;
-    var y = this.y + 137;
+    var y = this.y + 135; //137
     bottomRight.push(x);
     bottomRight.push(y);
     return bottomRight;
@@ -102,7 +111,7 @@ Player.prototype.bottomRight = function() {
 Player.prototype.upperLeft = function() {
     var upperLeft = [];
     var x = this.x + 20;
-    var y = this.y + 68;
+    var y = this.y + 75; //68
     upperLeft.push(x);
     upperLeft.push(y);
     return upperLeft;
@@ -110,7 +119,7 @@ Player.prototype.upperLeft = function() {
 Player.prototype.upperRight = function() {
     var upperRight = [];
     var x = this.x + 80;
-    var y = this.y + 68;
+    var y = this.y + 75;
     upperRight.push(x);
     upperRight.push(y);
     return upperRight;
@@ -122,7 +131,7 @@ Player.prototype.render = function(dt) {
     ctx.drawImage(Resources.get(this.image), this.x, this.y);
 };
 Player.prototype.handleInput = function(input) {
-    var increment = 100;
+    var increment = 85; //100
     if (input === 'up') {
         if (this.y - increment >= this.minY) {
             this.y -= increment;
@@ -134,7 +143,8 @@ Player.prototype.handleInput = function(input) {
             if (score > 0 && score % 5 == 0) {
                 level += 1;
             }
-            init();
+            reset();
+            //init();
         }
     }
     if (input === 'down') {
@@ -158,16 +168,18 @@ Player.prototype.handleInput = function(input) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-function instantiateGameObjects(level, score) {
-    allEnemies = [];
-    player = new Player();
-    // generate a random number of enemies within a range that varies with level, but will always be at least 2:
-    var numberEnemies = getRandomInteger(2, level + 4);
-    for (i = 0; i < numberEnemies; i++) {
-        var enemy = new Enemy();
-        allEnemies.push(enemy);
+function instantiateGameObjects(level, score, lives) {
+    if (lives > 0) {
+        allEnemies = [];
+        player = new Player();
+        // generate a random number of enemies within a range that varies with level, but will always be at least 2:
+        var numberEnemies = getRandomInteger(2, level + 4);
+        for (i = 0; i < numberEnemies; i++) {
+            var enemy = new Enemy();
+            allEnemies.push(enemy);
+        }
     }
-    writeBannerText("black", level, score);
+    writeBannerText("black", level, score, lives);
 }
 instantiateGameObjects(level, score);
 
@@ -175,12 +187,16 @@ function getRandomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function writeBannerText(color, level, score) {
+function writeBannerText(color, level, score, lives) {
     ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, 300, 100);
+    ctx.fillRect(0, 0, 500, 50);
     ctx.fillStyle = color;
     ctx.font = "24pt Helvetica";
-    var levelScoreText = "Level: " + level.toString() + "   Score: " + score.toString();
+    if (lives > 0) {
+        var levelScoreText = "Level: " + level.toString() + "   Score: " + score.toString() + "  Lives: " + lives.toString();
+    } else {
+        var levelScoreText = "GAME OVER";
+    }
     ctx.fillText(levelScoreText, 10, 25);
 }
 
