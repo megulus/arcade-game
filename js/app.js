@@ -2,7 +2,7 @@
 // this might get updated later in a version with additional functionality
 var level = 0;
 var score = 0;
-var lives = 3;
+var lives = 10;
 var allEnemies, player;
 
 
@@ -17,7 +17,7 @@ var Enemy = function() {
     this.x = -101; // all enemies start at the same x location - far left of game board
     this.y = getRandomInteger(1, 3) * 75; // each instance will one of 3 possible y values
     this.front = Math.floor(this.x + 100);
-    this.top = Math.floor(this.y + 86);
+    this.top = Math.floor(this.y + 90);
     this.bottom = Math.floor(this.y + 137);
     this.speed = getRandomInteger(50, 200);
 };
@@ -26,9 +26,9 @@ Enemy.prototype.overlapsPoint = function(coordArray) {
     var x = coordArray[0];
     var y = coordArray[1];
     if ((this.front - 10 <= x) && (x <= this.front + 10)) {
-        //console.log(this.top, this.bottom, y);
+        console.log(this.top - 12, this.bottom + 12, y);
     //if (((this.front - 10 <= x) && (x <= this.front + 10)) || ((this.x - 10 <= x) && (x <= this.x + 10))) {
-        if ((this.top <= y) && (y <= this.bottom)) {
+        if ((this.top - 12 <= y) && (y <= this.bottom + 12)) {
             score -= 1;
             lives -= 1;
             return true;
@@ -86,16 +86,16 @@ Enemy.prototype.render = function() {
 var Player = function() {
     this.image = 'images/char-boy.png';
     this.x = 200; //200
-    this.y = 415; // 425
+    this.y = 425; // 425
     this.minX = 0;
     this.maxX = 400;
-    this.minY = 25; // this is the edge of the water - a Y value < 50 will reset game (== success)
-    this.maxY = 415;
+    this.minY = 25; // this is the edge of the water
+    this.maxY = 425;
 };
 Player.prototype.bottomLeft = function() {
     var bottomLeft = [];
     var x = this.x + 20;
-    var y = this.y + 135;
+    var y = this.y + 137;
     bottomLeft.push(x);
     bottomLeft.push(y);
     return bottomLeft;
@@ -103,7 +103,7 @@ Player.prototype.bottomLeft = function() {
 Player.prototype.bottomRight = function() {
     var bottomRight = [];
     var x = this.x + 80;
-    var y = this.y + 135; //137
+    var y = this.y + 137;
     bottomRight.push(x);
     bottomRight.push(y);
     return bottomRight;
@@ -111,7 +111,7 @@ Player.prototype.bottomRight = function() {
 Player.prototype.upperLeft = function() {
     var upperLeft = [];
     var x = this.x + 20;
-    var y = this.y + 75; //68
+    var y = this.y + 68;
     upperLeft.push(x);
     upperLeft.push(y);
     return upperLeft;
@@ -119,7 +119,7 @@ Player.prototype.upperLeft = function() {
 Player.prototype.upperRight = function() {
     var upperRight = [];
     var x = this.x + 80;
-    var y = this.y + 75;
+    var y = this.y + 68;
     upperRight.push(x);
     upperRight.push(y);
     return upperRight;
@@ -131,20 +131,19 @@ Player.prototype.render = function(dt) {
     ctx.drawImage(Resources.get(this.image), this.x, this.y);
 };
 Player.prototype.handleInput = function(input) {
-    var increment = 85; //100
+    var increment = 90; //100
     if (input === 'up') {
         if (this.y - increment >= this.minY) {
             this.y -= increment;
         } else {
             // if this.y - increment < min.Y, player has reached the water and game resets
-            bkColor = canvas.backgroundColor;
             writeBannerText("white", level, score);
             score += 1;
             if (score > 0 && score % 5 == 0) {
                 level += 1;
             }
             reset();
-            //init();
+
         }
     }
     if (input === 'down') {
