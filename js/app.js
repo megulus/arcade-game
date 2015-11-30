@@ -1,8 +1,3 @@
-// Declare a level variable - initial/default value is 0, but
-// this might get updated later in a version with additional functionality
-var level = 0;
-var score = 0;
-var lives = 10;
 var allEnemies, player;
 
 
@@ -22,15 +17,9 @@ var Enemy = function() {
     this.speed = getRandomInteger(50, 200);
 };
 
-Enemy.prototype.overlapsPoint = function(coordArray) {
-    var x = coordArray[0];
-    var y = coordArray[1];
-    if ((this.front - 10 <= x) && (x <= this.front + 10)) {
-        console.log(this.top - 12, this.bottom + 12, y);
-    //if (((this.front - 10 <= x) && (x <= this.front + 10)) || ((this.x - 10 <= x) && (x <= this.x + 10))) {
-        if ((this.top - 12 <= y) && (y <= this.bottom + 12)) {
-            score -= 1;
-            lives -= 1;
+Enemy.prototype.overlapsPoint = function(x, y) {
+    if (((this.front - 5 <= x) && (x <= this.front + 5)) || ((this.x - 2 <= x) && (x <= this.x + 2))) {
+        if ((this.top - 12 <= y) && (y <= this.bottom + 5)) {
             return true;
         }
         return false;
@@ -47,29 +36,29 @@ Enemy.prototype.update = function(dt) {
     if (this.x >= 505) {
         this.x = -101;
         this.front = this.x + 100;
-        this.speed = getRandomInteger(50, 100) * (level + 1);
+        this.speed = getRandomInteger(50, 100) * (game.level + 1);
     }
     // handle collisions
     var bottomLeft, bottomRight, upperLeft, upperRight;
     bottomLeft = player.bottomLeft();
-    if (this.overlapsPoint(bottomLeft)) {
+    if (this.overlapsPoint(bottomLeft[0], bottomLeft[1])) {
+        game.playerLives -= 1;
         reset();
-        //init();
     }
     bottomRight = player.bottomRight();
-    if (this.overlapsPoint(bottomRight)) {
+    if (this.overlapsPoint(bottomRight[0], bottomRight[1])) {
+        game.playerLives -= 1;
         reset();
-        //init();
     }
     upperLeft = player.upperLeft();
-    if (this.overlapsPoint(upperLeft)) {
+    if (this.overlapsPoint(upperLeft[0], upperLeft[1])) {
+        game.playerLives -= 1;
         reset();
-        //init();
     }
     upperRight = player.upperRight();
-    if (this.overlapsPoint(upperRight)) {
+    if (this.overlapsPoint(upperRight[0], upperRight[1])) {
+        game.playerLives -= 1;
         reset();
-        //init();
     }
     this.x += dt * this.speed;
     this.front = this.x + 100;
@@ -85,44 +74,32 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 var Player = function() {
     this.image = 'images/char-boy.png';
-    this.x = 200; //200
-    this.y = 425; // 425
+    this.x = 200;
+    this.y = 425;
     this.minX = 0;
     this.maxX = 400;
-    this.minY = 25; // this is the edge of the water
+    this.minY = 25; // edge of the water
     this.maxY = 425;
 };
 Player.prototype.bottomLeft = function() {
-    var bottomLeft = [];
     var x = this.x + 20;
     var y = this.y + 137;
-    bottomLeft.push(x);
-    bottomLeft.push(y);
-    return bottomLeft;
+    return [x, y];
 };
 Player.prototype.bottomRight = function() {
-    var bottomRight = [];
     var x = this.x + 80;
     var y = this.y + 137;
-    bottomRight.push(x);
-    bottomRight.push(y);
-    return bottomRight;
+    return [x, y];
 };
 Player.prototype.upperLeft = function() {
-    var upperLeft = [];
     var x = this.x + 20;
     var y = this.y + 68;
-    upperLeft.push(x);
-    upperLeft.push(y);
-    return upperLeft;
+    return [x, y];
 };
 Player.prototype.upperRight = function() {
-    var upperRight = [];
     var x = this.x + 80;
     var y = this.y + 68;
-    upperRight.push(x);
-    upperRight.push(y);
-    return upperRight;
+    return [x, y];
 };
 Player.prototype.update = function() {
     // player movement is handled by handleinput and collisions handled by Enemy class - so what should this do?
@@ -131,16 +108,16 @@ Player.prototype.render = function(dt) {
     ctx.drawImage(Resources.get(this.image), this.x, this.y);
 };
 Player.prototype.handleInput = function(input) {
-    var increment = 90; //100
+    var increment = 90;
     if (input === 'up') {
         if (this.y - increment >= this.minY) {
             this.y -= increment;
         } else {
             // if this.y - increment < min.Y, player has reached the water and game resets
-            writeBannerText("white", level, score);
-            score += 1;
-            if (score > 0 && score % 5 == 0) {
-                level += 1;
+            writeBannerText();
+            game.score += 1;
+            if (game.score > 0 && game.score % 5 == 0) {
+                game.level += 1;
             }
             reset();
 
@@ -167,34 +144,34 @@ Player.prototype.handleInput = function(input) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-function instantiateGameObjects(level, score, lives) {
-    if (lives > 0) {
-        allEnemies = [];
-        player = new Player();
-        // generate a random number of enemies within a range that varies with level, but will always be at least 2:
-        var numberEnemies = getRandomInteger(2, level + 4);
-        for (i = 0; i < numberEnemies; i++) {
-            var enemy = new Enemy();
-            allEnemies.push(enemy);
-        }
+// This function is called by the reset() function in engine.js
+function instantiateGameObjects() {
+    allEnemies = [];
+    player = new Player();
+    // generate a random number of enemies within a range that varies with level, but will always be at least 2:
+    var numberEnemies = getRandomInteger(2, game.level + 4);
+    for (i = 0; i < numberEnemies; i++) {
+        var enemy = new Enemy();
+        allEnemies.push(enemy);
     }
-    writeBannerText("black", level, score, lives);
+    writeBannerText();
 }
-instantiateGameObjects(level, score);
+
 
 function getRandomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function writeBannerText(color, level, score, lives) {
+function writeBannerText() {
+    var levelScoreText;
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, 500, 50);
-    ctx.fillStyle = color;
+    ctx.fillStyle = "black";
     ctx.font = "24pt Helvetica";
-    if (lives > 0) {
-        var levelScoreText = "Level: " + level.toString() + "   Score: " + score.toString() + "  Lives: " + lives.toString();
+    if (game.playerLives > 0) {
+        levelScoreText = "Level: " + game.level.toString() + "   Score: " + game.score.toString() + "  Lives: " + game.playerLives.toString();
     } else {
-        var levelScoreText = "GAME OVER";
+        levelScoreText = "GAME OVER";
     }
     ctx.fillText(levelScoreText, 10, 25);
 }

@@ -23,7 +23,9 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        game = new GameTracker(0, 0, 5),
         lastTime;
+
 
     canvas.width = 505;
     canvas.height = 606;
@@ -56,7 +58,12 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+        if (!(game.playerDead())) {
+            win.requestAnimationFrame(main);
+        } else {
+            writeBannerText();
+        }
+
     }
 
     /* This function does some initial setup that should only occur once,
@@ -161,7 +168,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        instantiateGameObjects(level, score, lives);
+        instantiateGameObjects();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -182,7 +189,6 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
-    global.canvas = canvas;
-    global.init = init; // is there a better way to do this? I thought Engine was accessible globally...
     global.reset = reset;
+    global.game = game;
 })(this);
